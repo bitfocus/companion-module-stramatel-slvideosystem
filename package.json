@@ -1,0 +1,33 @@
+{
+	"name": "companion-module-STRAMATEL-slvideosystem",
+	"version": "1.0.0",
+	"description": "Companion module for controlling SLVideoSystem over TCP.",
+	"main": "src/main.js",
+	"scripts": {
+		"format": "prettier -w .",
+		"package": "companion-module-build"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Adrienraynaudd/companion-module-STRAMATEL-slvideosystem.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Adrienraynaudd/companion-module-STRAMATEL-slvideosystem/issues"
+	},
+	"homepage": "https://github.com/Adrienraynaudd/companion-module-STRAMATEL-slvideosystem#readme",
+	"engines": {
+		"node": "^22.20",
+		"yarn": "^4"
+	},
+	"dependencies": {
+		"@companion-module/base": "~2.0.4"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^3.0.1",
+		"eslint": "^9.39.3",
+		"prettier": "^3.8.3"
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json",
+	"packageManager": "yarn@4.12.0"
+}

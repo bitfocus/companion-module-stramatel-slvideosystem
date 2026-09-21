@@ -1,0 +1,28 @@
+{
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+	"type": "connection",
+	"id": "stramatel-slvideosystem",
+	"name": "SLVideoSystem",
+	"shortname": "slvideo",
+	"description": "Companion module for controlling SLVideoSystem over TCP.",
+	"version": "1.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-stramatel-slvideosystem.git",
+	"bugs": "https://github.com/bitfocus/companion-module-stramatel-slvideosystem/issues",
+	"maintainers": [
+		{
+			"name": "STRAMATEL",
+			"github": "StramatelBe"
+		}
+	],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../src/main.js"
+	},
+	"legacyIds": [],
+	"manufacturer": "STRAMATEL",
+	"products": ["SLVideoSystem"],
+	"keywords": ["slvideo", "tcp", "shortcuts", "streamdeck"]
+}
