@@ -19,9 +19,15 @@ Use the presets from the `SLVideo Grid` category.
 Each preset adds both of these at once:
 
 - the `Trigger shortcut` action
-- the `Shortcut visual state` advanced feedback
+- local variables fed by the `Shortcut property` value feedback, which drive the button background, icon and text
+
+The button follows the shortcut live: its colours and icon update when they change in SLVideoSystem, even if the preset was placed while SLVideoSystem was not running. While disconnected, the button shows `Disconnected` with its SLVideo row/column.
+
+Layered buttons require Companion with support for module API 2.1. On older versions the preset falls back to a simple button, whose colours and icon are fixed when the preset is placed.
 
 The preset does not save a fixed `shortcutId`. It stores the SLVideo row and column, and the module resolves the current shortcut for that grid slot from the latest shortcut list received from SLVideoSystem.
+
+The `Shortcut available` and `SLVideo disconnected` boolean feedbacks are also available for your own buttons.
 
 If you add the action or the feedback manually, either pick a specific SLVideo shortcut from the dropdown or leave the shortcut empty and set the row and column values yourself.
 

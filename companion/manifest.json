@@ -5,7 +5,7 @@
 	"name": "SLVideoSystem",
 	"shortname": "slvideo",
 	"description": "Companion module for controlling SLVideoSystem over TCP.",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-stramatel-slvideosystem.git",
 	"bugs": "https://github.com/bitfocus/companion-module-stramatel-slvideosystem/issues",

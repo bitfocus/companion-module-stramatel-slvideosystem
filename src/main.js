@@ -26,6 +26,10 @@ function parsePositiveInteger(value) {
 	return Number.isInteger(parsed) && parsed > 0 ? parsed : null
 }
 
+function colorToInt(hex) {
+	return parseInt(String(hex).replace(/^#/, ''), 16) || 0
+}
+
 function makeGridSlotKey(row, column) {
 	if (!Number.isFinite(row) || !Number.isFinite(column)) {
 		return ''
@@ -137,8 +141,9 @@ class ModuleInstance extends InstanceBase {
 		this.updateFeedbacks()
 		this.connectToServer()
 		this.updatePresets()
+		this.updateVariableDefinitions()
 		this.refreshVariableValues()
-		this.checkFeedbacks('shortcut_state')
+		this.checkFeedbacks('shortcut_property', 'shortcut_available', 'disconnected')
 		if (this.client.isConnected) {
 			this.sendGridSize()
 		}
@@ -212,7 +217,7 @@ class ModuleInstance extends InstanceBase {
 		this.sendGridSize()
 		this.requestShortcutLists()
 		this.refreshVariableValues()
-		this.checkFeedbacks('shortcut_state')
+		this.checkFeedbacks('shortcut_property', 'shortcut_available', 'disconnected')
 		this.subscribeActions('trigger_shortcut')
 	}
 
@@ -225,7 +230,7 @@ class ModuleInstance extends InstanceBase {
 		}
 
 		this.refreshVariableValues()
-		this.checkFeedbacks('shortcut_state')
+		this.checkFeedbacks('shortcut_property', 'shortcut_available', 'disconnected')
 	}
 
 	handleSocketMessage(message) {
@@ -248,6 +253,7 @@ class ModuleInstance extends InstanceBase {
 				this.updateActions()
 				this.updateFeedbacks()
 				this.updatePresets()
+				this.updateVariableDefinitions()
 				this.refreshVariableValues()
 				break
 			}
@@ -277,7 +283,7 @@ class ModuleInstance extends InstanceBase {
 			this.updateVariableDefinitions()
 		}
 		this.refreshVariableValues()
-		this.checkFeedbacks('shortcut_state')
+		this.checkFeedbacks('shortcut_property', 'shortcut_available', 'disconnected')
 	}
 
 	requestShortcutLists() {
@@ -465,55 +471,35 @@ class ModuleInstance extends InstanceBase {
 		return name
 	}
 
-	getShortcutFeedbackStyleForControl(controlId, options) {
-		if (!this.client.isConnected) {
-			return {
-				text: 'Disconnected',
-				size: 'auto',
-				color: DEFAULT_FOREGROUND,
-				bgcolor: DISCONNECTED_BACKGROUND,
-				png64: undefined,
-			}
+	getShortcutTextForGridPosition(position) {
+		const shortcut = this.getShortcutForGridPosition(position)
+		if (!shortcut || (shortcut.hasIcon && shortcut.iconBase64)) {
+			return ''
 		}
 
+		return this.formatShortcutText(shortcut)
+	}
+
+	getShortcutStyleForControl(controlId, options) {
 		const shortcut = this.getShortcutForControl(controlId, options)
-		if (!shortcut && this.shortcuts.length === 0) {
+
+		if (!this.client.isConnected) {
+			const position = shortcut?.position ?? this.getConfiguredGridPosition(options)
 			return {
-				text: 'No\nshortcuts',
-				size: 'auto',
-				color: DEFAULT_FOREGROUND,
-				bgcolor: DEFAULT_BACKGROUND,
-				png64: undefined,
+				text: position ? `Disconnected\n${position.row}/${position.column}` : 'Disconnected',
+				color: colorToInt(DEFAULT_FOREGROUND),
+				bgcolor: colorToInt(DISCONNECTED_BACKGROUND),
+				icon: null,
 			}
 		}
 
-		if (!shortcut) {
-			return {
-				text: '',
-				size: 'auto',
-				color: DEFAULT_FOREGROUND,
-				bgcolor: DEFAULT_BACKGROUND,
-				png64: undefined,
-			}
+		const icon = shortcut?.hasIcon && shortcut.iconBase64 ? shortcut.iconBase64 : null
+		return {
+			text: shortcut && !icon ? this.formatShortcutText(shortcut) : '',
+			color: colorToInt(shortcut?.foreColor || DEFAULT_FOREGROUND),
+			bgcolor: colorToInt(shortcut?.backColor || DEFAULT_BACKGROUND),
+			icon,
 		}
-
-		const style = {
-			text: this.formatShortcutText(shortcut),
-			size: 'auto',
-			color: shortcut.foreColor || DEFAULT_FOREGROUND,
-			bgcolor: shortcut.backColor || DEFAULT_BACKGROUND,
-			png64: undefined,
-		}
-
-		if (shortcut.hasIcon && shortcut.iconBase64) {
-			return {
-				...style,
-				text: '',
-				png64: shortcut.iconBase64,
-			}
-		}
-
-		return style
 	}
 
 	buildVariableDefinitions() {
@@ -526,6 +512,12 @@ class ModuleInstance extends InstanceBase {
 			last_shortcut_guid: { name: 'GUID of the last triggered shortcut' },
 			last_shortcut_name: { name: 'Name of the last triggered shortcut' },
 			shortcut_cache_json: { name: 'Raw JSON cache of known shortcuts' },
+		}
+
+		for (let row = 0; row < this.getGridRows(); row++) {
+			for (let column = 0; column < this.getGridColumns(); column++) {
+				definitions[`slot_${row}_${column}_text`] = { name: `Button text for row ${row} / column ${column}` }
+			}
 		}
 
 		for (const [index, shortcut] of this.shortcuts.entries()) {
@@ -555,6 +547,12 @@ class ModuleInstance extends InstanceBase {
 			last_shortcut_guid: this.lastTriggeredShortcut?.guid ?? '',
 			last_shortcut_name: this.lastTriggeredShortcut?.name ?? '',
 			shortcut_cache_json: JSON.stringify(this.shortcuts),
+		}
+
+		for (let row = 0; row < currentGridSize.rows; row++) {
+			for (let column = 0; column < currentGridSize.columns; column++) {
+				values[`slot_${row}_${column}_text`] = this.getShortcutTextForGridPosition({ row, column })
+			}
 		}
 
 		for (const [index, shortcut] of this.shortcuts.entries()) {
